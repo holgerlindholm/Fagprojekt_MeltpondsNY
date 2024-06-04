@@ -8,6 +8,7 @@ Step 1: Download ICESat-2 and Sentinel-2 flight data:
 
 Step 2: Download shapefiles of Greenland and Canada - used to sort out areas over land. 
 Step 3: Run NEW_FindOverlap to get overlap between Sentinel-2 and ICESat-2
+Result is stored in: Overlap_20min_sommer19-23.xlsx
 
 ## Download data
 Step 1: Find overlapping tile from the excel sheet: 
