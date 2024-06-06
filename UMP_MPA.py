@@ -15,6 +15,7 @@ from pyproj import Transformer
 from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import PolynomialFeatures
 from numpy import polyfit
+import shutil
 
 def tiff_to_np_RGB(Sentinel_name):
     """Opens tiff file and converts to np array 
@@ -23,8 +24,7 @@ def tiff_to_np_RGB(Sentinel_name):
         # # Convert tiff to np array and transform coordinates
         print(src.read().shape)
         big_img = np.array([adjust_band(src.read(i)) for i in (3,2,1)])
-        #big_img = np.array(adjust_band(src.read(4)))
-        gain = 1.5 # Adjust the gain (brightness) of the image
+        gain = 1 # Adjust the gain (brightness) of the image
         big_img = big_img * gain
     return big_img,src.transform,src.crs
 
@@ -107,94 +107,115 @@ def cut_and_save(event,ax):
     # Save depths to csv
     df_depths = pd.DataFrame({"x_atc": depths[0], "lat_ph": depths[1], "lon_ph": depths[2], "depth": depths[3]})
     df_depths = trim_data_by_xatc(df_depths,xmin,xmax)
-    df_depths.to_csv(f"{icesat_file}_depths.csv", index=False)
+    print(icesat_file)
+    icesat_out_path = os.path.join(out_path,icesat_file)
+    df_depths.to_csv(f"{icesat_out_path}_depths.csv", index=False)
+    tiff_out_path = os.path.join(out_path,tiff_file)
+    shutil.copy(tiff_path, tiff_out_path)
+    
+    # Verify the copy operation
+    if os.path.exists(tiff_out_path):
+        print(f"File copied successfully to {tiff_out_path}")
+    else:
+        print("File copy failed")
 
-def fit_curve(event,ax):
-    """Fit a curve to the data"""
-    model = LinearRegression()
+def finish():
+    print("All files have been processed")
+    print("Copying drift values to drift.csv")
+    drift_path = os.path.join(path,"drift_values.csv")
+    drift = pd.read_csv(drift_path)
+    indices = [int(f.split("_")[0]) for f in os.listdir(out_path) if "depths" in f]
+    print(indices)
+    print(drift)
+    filtered_drift = drift.loc[drift["Meltpond_ID"].isin(indices)]
+    print(filtered_drift)
+    filtered_drift.to_csv(os.path.join(out_path,"drift.csv"),index=False)
+    print("Drift values copied to drift.csv")
+
+def get_surface_height(df):
+    """Get the surface height of the segment"""
+    segment_ice_height = calculate_mode(df["h_ph"]) # Get mode surface height of whole segment
+    df["h_ph"] -= segment_ice_height
+    df = trim_data_by_height(df, -5, 5)
+    segment_ice_height = calculate_mode(df["h_ph"]) # Avoid scattering from atmosphere
+    df["h_ph"] -= segment_ice_height
+    df = trim_data_by_height(df, -5, 5)
+    return segment_ice_height,df
+
+def get_zoomed_depths(event,ax,df):
+    # Trim data by x_atc
     xlim = ax.get_xlim()
     xmin = min(xlim)
     xmax = max(xlim)
+    df = trim_data_by_xatc(df, xmin, xmax)
+    print(f"Getting zoomed depths for {xmin} to {xmax}")
 
-    print(len(depths[0]))
-    df_depths = pd.DataFrame({"x_atc": depths[0], "lat_ph": depths[1], "lon_ph": depths[2], "depth": depths[3]})
-    print(df_depths)
-    df_depths = trim_data_by_xatc(df_depths,xmin,xmax)
-    print(df_depths)
-    x = np.array(df_depths["x_atc"]) # x_atc
-    y = np.array(df_depths["depth"]) # no refraction correction
-    degree = 5
-    z = np.polyfit(x, y, degree)
-    p = np.poly1d(z)
-    print(p)
+    """Get the surface height of the segment"""
+    segment_ice_height = calculate_mode(df["h_ph"]) # Get mode surface height of zoomed in segment
+    print("Segment ice height:",segment_ice_height)
 
-    # Calculate residuals and outliers
-    residuals = y - p(x)
-    mean_residual = np.mean(residuals)
-    std_residual = np.std(residuals)
-    outliers_std_method = np.abs(residuals - mean_residual) > 2 * std_residual
-        
-    # Plot result
-    ax.plot(x, p(x), color='green', label=f'Polynomial Fit (degree={degree})')
-    ax.scatter(x[outliers_std_method], y[outliers_std_method], color='orange', label='Outliers (Std method)')
-    plt.draw()
+    depths = calculate_depths(df, bin_width,upper_height=-0.1)
+
+    ax.hlines(segment_ice_height, min(df["x_atc"]), max(df["x_atc"]), color="orange")
+    ax.scatter(depths[0], depths[4], c="red")
+    ax.scatter(depths[0], depths[4], c="red",label="No refraction correction")
+    ax.plot(depths[0], depths[3], c="blue")
+    ax.scatter(depths[0], depths[3], c="blue",label="Refraction corrected")
+    ax.legend()
 
 ############################################
 """MAIN PROGRAM STARTS HERE"""
 ############################################
 
 data_folder = "20210706221959_floki/" # CHANGE ME!
-index = 18 # CHANGE ME meltpond_id in folder!
-path = os.path.join(os.getcwd(),"Detected_meltponds",data_folder) 
-print(path)
+index = 3 # CHANGE ME meltpond_id in folder!
+path = os.path.join(os.getcwd(),"Detected_meltponds",data_folder)
+out_path = os.path.join(os.getcwd(),"Detected_meltponds",data_folder,"depths")
 
 # Get files in folder
 Files = os.listdir(path)
 icesat_files = [f for f in Files if ("ATL03" in f) and ("csv" in f) and ("depths" not in f)]
-icesat_file = os.path.join(path,icesat_files[index])
+icesat_file = icesat_files[index]
+icesat_path = os.path.join(path,icesat_file)
+print(icesat_file)
 fileidx = icesat_file.split("/")[-1].split("_")[0]
-tiff_path = [os.path.join(path,f) for f in Files if ("tiff" in f) and f.split("_")[0] == fileidx][0]
-print(tiff_path)
-df = pd.DataFrame(pd.read_csv(icesat_file)) # load icesat data
+tiff_file = [f for f in Files if ("tiff" in f) and f.split("_")[0] == fileidx][0]
+tiff_path = os.path.join(path,tiff_file)
+df = pd.DataFrame(pd.read_csv(icesat_path)) # load icesat data
 
 # Trim data by height
 df = trim_data_by_height(df, 0, 30)
 bin_width = 5 # meters
 
-# Get approximate mode of the distribution ie. surface height
-segment_ice_height = calculate_mode(df["h_ph"]) # Get mode surface height of whole segment
-df = trim_data_by_height(df, segment_ice_height-5, segment_ice_height+5)
-df["h_ph"] -= segment_ice_height
-print(segment_ice_height)
-
-# Calculate depths
-depths = calculate_depths(df, bin_width,upper_height=-0.10)
+segment_ice_height,df = get_surface_height(df)
 
 fig, (ax1,ax2) = plt.subplots(1,2) # Create figure
 
 # Plot ICEsat data - along track distance vs photon height
 ax1.scatter(df["x_atc"], df["h_ph"], c="black", alpha=0.5, s=1)
-ax1.plot(depths[0], depths[4], c="red",label="No refraction correction")
-ax1.plot(depths[0],depths[3],c="blue",label="Refraction correction")
 ax1.set(xlabel="Distance along track (m)", ylabel="Photon height (m)")
 ax1.hlines(0, min(df["x_atc"]), max(df["x_atc"]), color="green")
 
 # Create a button to print bbox
-button_ax_cut = fig.add_axes([0.85, 0.01, 0.1, 0.05])  # [left, bottom, width, height]
+button_ax_cut = fig.add_axes([0.80, 0.01, 0.1, 0.05])  # [left, bottom, width, height]
 button_cut = Button(button_ax_cut, 'cut')
 button_cut.on_clicked(lambda event: cut_and_save(event, ax1))
 
-# # Create a button to print bbox
-# button_fit_curve = fig.add_axes([0.15, 0.01, 0.1, 0.05])  # [left, bottom, width, height]
-# button_cut = Button(button_fit_curve, 'fit')
-# button_cut.on_clicked(lambda event: fit_curve(event, ax1))
+# Create a finish button
+button_ax_finish = fig.add_axes([0.90, 0.01, 0.1, 0.05])  # [left, bottom, width, height]
+button_finish = Button(button_ax_finish, 'finish all')
+button_finish.on_clicked(lambda event: finish())
+
+# # Create a button to get surface height
+button_ax_surface = fig.add_axes([0.05, 0.01, 0.1, 0.05])  # [left, bottom, width, height]
+button_surface = Button(button_ax_surface, 'get surface')
+button_surface.on_clicked(lambda event: get_zoomed_depths(event,ax1,df))
 
 # Plot Sentinel image for reference
 img_1_RGB,transform_1,src = tiff_to_np_RGB(tiff_path)
 ice_x,ice_y = transform_coords_to_utm(df,src)
 ax2.scatter(ice_x,ice_y)
 show(img_1_RGB,transform=transform_1,ax=ax2)
-ax1.legend()
 plt.show()
 
 
