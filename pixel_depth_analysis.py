@@ -26,7 +26,7 @@ def tiff_to_np_RGB(Sentinel_name):
         # # Convert tiff to np array and transform coordinates
         big_img = np.array([adjust_band(src.read(i)) for i in (3,2,1)])
         #np.array([sr.read(1),src-read(2],srac.read(3])
-        gain = 1.5 # Adjust the gain (brightness) of the image
+        gain = 1.2 # Adjust the gain (brightness) of the image
         big_img = big_img * gain
     return big_img,src.transform,src.crs
 
@@ -47,12 +47,6 @@ def tiff_to_np(Sentinel_name):
         lats = np.array(ys)[:,0]
         print('lons shape', lons.shape)    
         
-        # making sure the pixel coordinate is center of pixel
-        half_width_lons = (max(lons)-min(lons))/(len(lons) * 2)
-        half_width_lats = (max(lats)-min(lats))/(len(lats) * 2)
-        
-        lons = lons + half_width_lons
-        lats = lats + half_width_lats
     return big_img,src.transform,src.crs,lons,lats
 
 def transform_coords_to_utm(df,crs):
@@ -80,7 +74,7 @@ def datetime_diff(datetime1, datetime2):
     return(datetime2.timestamp()-datetime1.timestamp())
 
 # Folder containing input data
-path = "C:/Users/signe/Downloads/MPFINAL"
+path = "C:/Users/signe/Downloads/Meltponds_batch_1"
 
 # Extract the files in the folder and sort them: 
 # 1_ICESat2.csv, 1_depth.csv, 1_tiff.tiff, 2_ICESat2.csv, 2_depth.csv, 2_tiff.tiff, ...
@@ -88,17 +82,18 @@ files = os.listdir(path)
 files_comb = []
 for j in range(1,int((len(files)-1)/3+1)):
     print(j)
+    k = [11,14,18,8,9]
     meltpond = []
     for i in range(len(files)):
-        if files[i].startswith(f"{j}_"):
+        if files[i].startswith(f"{k[j-1]}_"):
             meltpond.append(files[i])
     files_comb.append(meltpond)
 
 # Read the drift values
 drift = pd.read_csv(os.path.join(path,"drift_values.csv"))
 
-index = 1 # CHANGE ME!
-drift_constant = 0.95 # change me!!
+index = 4 # CHANGE ME
+drift_constant = 1.0 # change me!!
 
 
 tiff_path = f"{path}/{files_comb[index][2]}"
@@ -116,7 +111,6 @@ timediff = datetime_diff(tiff_time,icesat_time)
 print(timediff)
 
 # Open the tiff file and the icesat file
-fig,(ax1,ax2) = plt.subplots(1,2)
 img_1_RGB,transform_1,src = tiff_to_np_RGB(tiff_path)
 img_1,transform_1,src,lons,lats = tiff_to_np(tiff_path)
 print(img_1.shape)
@@ -127,11 +121,6 @@ depth_x,depth_y = transform_coords_to_utm(depth_df,src)
 ice_x,ice_y = transform_coords_to_utm(icesat_df,src)
 drift_xNy = depth_x + drift["xs_drift"][index]*timediff*drift_constant
 drift_yNy = depth_y + drift["ys_drift"][index]*timediff*drift_constant
-
-show(img_1_RGB,transform=transform_1,ax=ax1)
-ax1.scatter(depth_x,depth_y)
-ax1.scatter(drift_xNy,drift_yNy,c=depth_df["depth"],cmap="viridis")
-ax2.scatter(depth_df["x_atc"],depth_df["depth"])
 
 
 def nearest_pixel(ice_x, ice_y, sentinel_x, sentinel_y):
@@ -170,10 +159,10 @@ def pixel_depth_data(index, x_pond_pixels, y_pond_pixels, sentinel_x, sentinel_y
     pixel_information[:,[1,2]] = np.transpose([pixel_lat, pixel_lon])
    
     for i in range(pond_img.shape[0]):
-        pixel_information[:,i+3] = pond_img[i,x_pond_pixels,y_pond_pixels]
-   
-    pixel_information[:,7] = depth_df['depth'] 
-   
+        print(i)
+        pixel_information[:,i+3] = pond_img[i,y_pond_pixels,x_pond_pixels]
+    pixel_information[:,7] = depth_df['depth']
+    
     return pixel_information, x_pixels, y_pixels
 
 
@@ -239,6 +228,18 @@ zone = [src.wkt[26:28],src.wkt[28]]
 x_pond_pixels, y_pond_pixels = nearest_pixel(drift_xNy, drift_yNy, lons, lats)
 pixel_info_matrix, x_pixels, y_pixels = pixel_depth_data(index, x_pond_pixels, y_pond_pixels, lons, lats, img_1, depth_df, zone)
 final_df = final_df_setup(pixel_info_matrix, tiff_time, icesat_time)
+
+drift_xNy = depth_x + drift["xs_drift"][index]*timediff*drift_constant
+drift_yNy = depth_y + drift["ys_drift"][index]*timediff*drift_constant
+
+fig,(ax1,ax2) = plt.subplots(1,2)
+img_2 = img_1_RGB
+img_2[:,y_pond_pixels,x_pond_pixels] = 0
+show(img_2,transform=transform_1,ax=ax1)
+ax1.scatter(depth_x,depth_y)
+ax1.scatter(drift_xNy,drift_yNy,c=depth_df["depth"],cmap="viridis")
+ax1.scatter(max(lons),max(lats))
+ax2.scatter(depth_df["x_atc"],depth_df["depth"])
 
 clicker = clicker(ax1, ["1", "2"], markers = ["*", "*"])
 
