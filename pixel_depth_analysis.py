@@ -98,7 +98,7 @@ for j in range(1,int((len(files)-1)/3+1)):
 drift = pd.read_csv(os.path.join(path,"drift_values.csv"))
 
 index = 1 # CHANGE ME!
-drift_constant = 0.90 # change me!!
+drift_constant = 0.95 # change me!!
 
 
 tiff_path = f"{path}/{files_comb[index][2]}"
