@@ -19,7 +19,7 @@ import csv
 
 segment_folder_path = "C:/Users/chrel/Documents/Fagprojekt_Lokal/Fagprojekt-Meltponds-master/Tile_06_07_1629/"
 
-storage_folder = "C:/Users/chrel/Documents/GitHub/Fagprojekt_MeltpondsNY/Detected_meltponds/20210706162901_Christian/"
+storage_folder = "C:/Users/chrel/Documents/GitHub/Fagprojekt_MeltpondsNY/Detected_meltponds/20210706162901_ChristianT"
 
 #Error message pop up
 def error_message_window(message):
@@ -348,7 +348,7 @@ def inspect_segment(segment_list):
 
 #Pick the number and beam
 
-selected_data = select_data("1","gt1ls")
+selected_data = select_data("0","gt1ls")
 
 inspect_segment(selected_data)
 
