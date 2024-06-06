@@ -154,7 +154,8 @@ def get_zoomed_depths(event,ax,df):
     segment_ice_height = calculate_mode(df["h_ph"]) # Get mode surface height of zoomed in segment
     print("Segment ice height:",segment_ice_height)
 
-    depths = calculate_depths(df, bin_width,upper_height=-0.1)
+    global depths
+    depths = calculate_depths(df, bin_width,upper_height=-0.25)
 
     ax.hlines(segment_ice_height, min(df["x_atc"]), max(df["x_atc"]), color="orange")
     ax.scatter(depths[0], depths[4], c="red")
@@ -168,10 +169,11 @@ def get_zoomed_depths(event,ax,df):
 ############################################
 
 data_folder = "20210706221959_floki/" # CHANGE ME!
-index = 3 # CHANGE ME meltpond_id in folder!
+index = 7 # CHANGE ME meltpond_id in folder!
 path = os.path.join(os.getcwd(),"Detected_meltponds",data_folder)
 out_path = os.path.join(os.getcwd(),"Detected_meltponds",data_folder,"depths")
 
+depths = 0
 # Get files in folder
 Files = os.listdir(path)
 icesat_files = [f for f in Files if ("ATL03" in f) and ("csv" in f) and ("depths" not in f)]
@@ -185,7 +187,7 @@ df = pd.DataFrame(pd.read_csv(icesat_path)) # load icesat data
 
 # Trim data by height
 df = trim_data_by_height(df, 0, 30)
-bin_width = 5 # meters
+bin_width = 3 # meters
 
 segment_ice_height,df = get_surface_height(df)
 
