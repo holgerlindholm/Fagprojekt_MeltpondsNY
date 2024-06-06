@@ -14,6 +14,7 @@ from rasterio.plot import show,adjust_band
 from pyproj import Transformer
 from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import PolynomialFeatures
+from numpy import polyfit
 
 def tiff_to_np_RGB(Sentinel_name):
     """Opens tiff file and converts to np array 
@@ -121,27 +122,20 @@ def fit_curve(event,ax):
     df_depths = trim_data_by_xatc(df_depths,xmin,xmax)
     print(df_depths)
     x = np.array(df_depths["x_atc"]) # x_atc
-    x = x.reshape(-1, 1)
     y = np.array(df_depths["depth"]) # no refraction correction
-    
-    # Create polynomial features
-    degree = 20
-    poly = PolynomialFeatures(degree)
-    x_poly = poly.fit_transform(x)
-
-    # Fit the linear regression model
-    model = LinearRegression()
-    model.fit(x_poly, y)
-    y_pred = model.predict(x_poly)
+    degree = 5
+    z = np.polyfit(x, y, degree)
+    p = np.poly1d(z)
+    print(p)
 
     # Calculate residuals and outliers
-    residuals = y - y_pred
+    residuals = y - p(x)
     mean_residual = np.mean(residuals)
     std_residual = np.std(residuals)
     outliers_std_method = np.abs(residuals - mean_residual) > 2 * std_residual
         
     # Plot result
-    ax.plot(x, y_pred, color='green', label=f'Polynomial Fit (degree={degree})')
+    ax.plot(x, p(x), color='green', label=f'Polynomial Fit (degree={degree})')
     ax.scatter(x[outliers_std_method], y[outliers_std_method], color='orange', label='Outliers (Std method)')
     plt.draw()
 
@@ -150,7 +144,7 @@ def fit_curve(event,ax):
 ############################################
 
 data_folder = "20210706221959_floki/" # CHANGE ME!
-index = 0 # CHANGE ME meltpond_id in folder!
+index = 18 # CHANGE ME meltpond_id in folder!
 path = os.path.join(os.getcwd(),"Detected_meltponds",data_folder) 
 print(path)
 
@@ -174,7 +168,7 @@ df["h_ph"] -= segment_ice_height
 print(segment_ice_height)
 
 # Calculate depths
-depths = calculate_depths(df, bin_width,upper_height=-0.05)
+depths = calculate_depths(df, bin_width,upper_height=-0.10)
 
 fig, (ax1,ax2) = plt.subplots(1,2) # Create figure
 
@@ -190,16 +184,17 @@ button_ax_cut = fig.add_axes([0.85, 0.01, 0.1, 0.05])  # [left, bottom, width, h
 button_cut = Button(button_ax_cut, 'cut')
 button_cut.on_clicked(lambda event: cut_and_save(event, ax1))
 
-# Create a button to print bbox
-button_fit_curve = fig.add_axes([0.15, 0.01, 0.1, 0.05])  # [left, bottom, width, height]
-button_cut = Button(button_fit_curve, 'fit')
-button_cut.on_clicked(lambda event: fit_curve(event, ax1))
+# # Create a button to print bbox
+# button_fit_curve = fig.add_axes([0.15, 0.01, 0.1, 0.05])  # [left, bottom, width, height]
+# button_cut = Button(button_fit_curve, 'fit')
+# button_cut.on_clicked(lambda event: fit_curve(event, ax1))
 
 # Plot Sentinel image for reference
 img_1_RGB,transform_1,src = tiff_to_np_RGB(tiff_path)
 ice_x,ice_y = transform_coords_to_utm(df,src)
 ax2.scatter(ice_x,ice_y)
 show(img_1_RGB,transform=transform_1,ax=ax2)
+ax1.legend()
 plt.show()
 
 
