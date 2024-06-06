@@ -144,7 +144,7 @@ def fit_curve(event,ax):
 ############################################
 
 data_folder = "20210706221959_floki/" # CHANGE ME!
-index = 1 # CHANGE ME meltpond_id in folder!
+index = 18 # CHANGE ME meltpond_id in folder!
 path = os.path.join(os.getcwd(),"Detected_meltponds",data_folder) 
 print(path)
 
@@ -168,7 +168,7 @@ df["h_ph"] -= segment_ice_height
 print(segment_ice_height)
 
 # Calculate depths
-depths = calculate_depths(df, bin_width,upper_height=-0.05)
+depths = calculate_depths(df, bin_width,upper_height=-0.10)
 
 fig, (ax1,ax2) = plt.subplots(1,2) # Create figure
 
@@ -184,16 +184,17 @@ button_ax_cut = fig.add_axes([0.85, 0.01, 0.1, 0.05])  # [left, bottom, width, h
 button_cut = Button(button_ax_cut, 'cut')
 button_cut.on_clicked(lambda event: cut_and_save(event, ax1))
 
-# Create a button to print bbox
-button_fit_curve = fig.add_axes([0.15, 0.01, 0.1, 0.05])  # [left, bottom, width, height]
-button_cut = Button(button_fit_curve, 'fit')
-button_cut.on_clicked(lambda event: fit_curve(event, ax1))
+# # Create a button to print bbox
+# button_fit_curve = fig.add_axes([0.15, 0.01, 0.1, 0.05])  # [left, bottom, width, height]
+# button_cut = Button(button_fit_curve, 'fit')
+# button_cut.on_clicked(lambda event: fit_curve(event, ax1))
 
 # Plot Sentinel image for reference
 img_1_RGB,transform_1,src = tiff_to_np_RGB(tiff_path)
 ice_x,ice_y = transform_coords_to_utm(df,src)
 ax2.scatter(ice_x,ice_y)
 show(img_1_RGB,transform=transform_1,ax=ax2)
+ax1.legend()
 plt.show()
 
 
