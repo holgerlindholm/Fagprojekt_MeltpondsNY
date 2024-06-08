@@ -98,6 +98,7 @@ def calculate_depths(df,bin_width=5,upper_height=-0.15,lower_height=-5):
     return [x_atc_moving_avg, lat_moving_avg, lon_moving_avg, depths_moving_avg, depths_moving_avg_no_refraction]
 
 def cut_and_save(event,ax):
+    """Cut the data and save the depths to a csv file"""
     print("Cutting data")
     xlim = ax.get_xlim()
     xmin = min(xlim)
@@ -120,8 +121,17 @@ def cut_and_save(event,ax):
         print("File copy failed")
 
 def finish():
+    """Finish the program and copy drift values to drift.csv"""
+    if not os.path.exists(out_path):
+        # Create the directory
+        os.makedirs(out_path)
+        print(f"Directory '{out_path}' created successfully.")
+    else:
+        print(f"Directory '{out_path}' already exists.")
+        
     print("All files have been processed")
     print("Copying drift values to drift.csv")
+   
     drift_path = os.path.join(path,"drift_values.csv")
     drift = pd.read_csv(drift_path)
     indices = [int(f.split("_")[0]) for f in os.listdir(out_path) if "depths" in f]
@@ -155,21 +165,30 @@ def get_zoomed_depths(event,ax,df):
     print("Segment ice height:",segment_ice_height)
 
     global depths
-    depths = calculate_depths(df, bin_width,upper_height=-0.25)
+    depths = calculate_depths(df, bin_width,upper_height=-0.1)
 
-    ax.hlines(segment_ice_height, min(df["x_atc"]), max(df["x_atc"]), color="orange")
+    #ax.hlines(segment_ice_height, min(df["x_atc"]), max(df["x_atc"]), color="orange")
     ax.scatter(depths[0], depths[4], c="red")
     ax.scatter(depths[0], depths[4], c="red",label="No refraction correction")
     ax.plot(depths[0], depths[3], c="blue")
     ax.scatter(depths[0], depths[3], c="blue",label="Refraction corrected")
     ax.legend()
 
+def auto_zoom_tiff(event):
+    xlim = ax1.get_xlim()
+    df_trimmed = trim_data_by_xatc(df, min(xlim), max(xlim))
+    ice_x_trimmed,ice_y_trimmed = transform_coords_to_utm(df_trimmed,src)
+    ax2.clear()
+    ax2.scatter(ice_x_trimmed,ice_y_trimmed)
+    show(img_1_RGB,transform=transform_1,ax=ax2)
+    plt.draw()
+
 ############################################
 """MAIN PROGRAM STARTS HERE"""
 ############################################
 
-data_folder = "20210706221959_floki/" # CHANGE ME!
-index = 7 # CHANGE ME meltpond_id in folder!
+data_folder = "20210706162901_ChristianT/" # CHANGE ME!
+index = 0 # CHANGE ME meltpond_id in folder!
 path = os.path.join(os.getcwd(),"Detected_meltponds",data_folder)
 out_path = os.path.join(os.getcwd(),"Detected_meltponds",data_folder,"depths")
 
@@ -186,8 +205,8 @@ tiff_path = os.path.join(path,tiff_file)
 df = pd.DataFrame(pd.read_csv(icesat_path)) # load icesat data
 
 # Trim data by height
-df = trim_data_by_height(df, 0, 30)
-bin_width = 3 # meters
+df = trim_data_by_height(df, -5, 30)
+bin_width = 1 # meters
 
 segment_ice_height,df = get_surface_height(df)
 
@@ -197,6 +216,10 @@ fig, (ax1,ax2) = plt.subplots(1,2) # Create figure
 ax1.scatter(df["x_atc"], df["h_ph"], c="black", alpha=0.5, s=1)
 ax1.set(xlabel="Distance along track (m)", ylabel="Photon height (m)")
 ax1.hlines(0, min(df["x_atc"]), max(df["x_atc"]), color="green")
+
+# Auto zoom tiff image based on change in ICEsat plot
+ax1.callbacks.connect('xlim_changed', auto_zoom_tiff)
+ax1.callbacks.connect('ylim_changed', auto_zoom_tiff)
 
 # Create a button to print bbox
 button_ax_cut = fig.add_axes([0.80, 0.01, 0.1, 0.05])  # [left, bottom, width, height]
