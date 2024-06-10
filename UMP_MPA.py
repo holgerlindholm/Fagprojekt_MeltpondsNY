@@ -171,7 +171,7 @@ def get_zoomed_depths(event,ax,df):
     print("Segment ice height:",segment_ice_height)
 
     global depths
-    depths = calculate_depths(df, bin_width,upper_height=-0.10)
+    depths = calculate_depths(df, bin_width,upper_height=-0.2)
 
     #ax.hlines(segment_ice_height, min(df["x_atc"]), max(df["x_atc"]), color="orange")
     ax.scatter(depths[0], depths[4], c="red")
@@ -193,8 +193,10 @@ def auto_zoom_tiff(event):
 """MAIN PROGRAM STARTS HERE"""
 ############################################
 
-data_folder = "20210706162901_ChristianT/" # CHANGE ME!
-index = 25 # CHANGE ME meltpond_id in folder!
+# data_folder = "20210706162901_ChristianT/" # DONE!
+# data_folder = "20210706221959_floki/" MANGLER DRIFT
+data_folder = "20210707141741_Christian/"
+index = 12 # CHANGE ME meltpond_id in folder!
 path = os.path.join(os.getcwd(),"Detected_meltponds",data_folder)
 out_path = os.path.join(os.getcwd(),"Detected_meltponds",data_folder,"depths")
 
@@ -210,7 +212,7 @@ tiff_path = os.path.join(path,tiff_file)
 df = pd.DataFrame(pd.read_csv(icesat_path)) # load icesat data
 
 # Trim data by height
-df = trim_data_by_height(df, 20, 30)
+df = trim_data_by_height(df, 10, 35)
 bin_width = 5 # meters
 
 segment_ice_height,df = get_surface_height(df)
