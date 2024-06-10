@@ -194,8 +194,9 @@ def auto_zoom_tiff(event):
 ############################################
 
 # data_folder = "20210706162901_ChristianT/" # DONE!
-# data_folder = "20210706221959_floki/" MANGLER DRIFT
-data_folder = "20210707141741_Christian/"
+# data_folder = "20210706221959_floki/" #MANGLER DRIFT
+# data_folder = "20210707141741_Christian/" #DONE!
+
 index = 12 # CHANGE ME meltpond_id in folder!
 path = os.path.join(os.getcwd(),"Detected_meltponds",data_folder)
 out_path = os.path.join(os.getcwd(),"Detected_meltponds",data_folder,"depths")
