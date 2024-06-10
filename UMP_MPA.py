@@ -94,7 +94,8 @@ def calculate_depths(df,bin_width=5,upper_height=-0.15,lower_height=-5):
             depths_moving_avg_no_refraction.append(avg_mode)
             x_atc_moving_avg.append(middle_dist)
         except ValueError:
-            continue
+            continue 
+        
     return [x_atc_moving_avg, lat_moving_avg, lon_moving_avg, depths_moving_avg, depths_moving_avg_no_refraction]
 
 def cut_and_save(event,ax):
@@ -104,6 +105,13 @@ def cut_and_save(event,ax):
     xmin = min(xlim)
     xmax = max(xlim)
     print(xlim)
+
+    if not os.path.exists(out_path):
+        # Create the directory
+        os.makedirs(out_path)
+        print(f"Directory '{out_path}' created successfully.")
+    else:
+        print(f"Directory '{out_path}' already exists.")
 
     # Save depths to csv
     df_depths = pd.DataFrame({"x_atc": depths[0], "lat_ph": depths[1], "lon_ph": depths[2], "depth": depths[3]})
@@ -145,9 +153,7 @@ def finish():
 def get_surface_height(df):
     """Get the surface height of the segment"""
     segment_ice_height = calculate_mode(df["h_ph"]) # Get mode surface height of whole segment
-    df["h_ph"] -= segment_ice_height
-    df = trim_data_by_height(df, -5, 5)
-    segment_ice_height = calculate_mode(df["h_ph"]) # Avoid scattering from atmosphere
+    print("Segment ice height:",segment_ice_height)
     df["h_ph"] -= segment_ice_height
     df = trim_data_by_height(df, -5, 5)
     return segment_ice_height,df
@@ -165,7 +171,7 @@ def get_zoomed_depths(event,ax,df):
     print("Segment ice height:",segment_ice_height)
 
     global depths
-    depths = calculate_depths(df, bin_width,upper_height=-0.1)
+    depths = calculate_depths(df, bin_width,upper_height=-0.10)
 
     #ax.hlines(segment_ice_height, min(df["x_atc"]), max(df["x_atc"]), color="orange")
     ax.scatter(depths[0], depths[4], c="red")
@@ -188,11 +194,10 @@ def auto_zoom_tiff(event):
 ############################################
 
 data_folder = "20210706162901_ChristianT/" # CHANGE ME!
-index = 0 # CHANGE ME meltpond_id in folder!
+index = 25 # CHANGE ME meltpond_id in folder!
 path = os.path.join(os.getcwd(),"Detected_meltponds",data_folder)
 out_path = os.path.join(os.getcwd(),"Detected_meltponds",data_folder,"depths")
 
-depths = 0
 # Get files in folder
 Files = os.listdir(path)
 icesat_files = [f for f in Files if ("ATL03" in f) and ("csv" in f) and ("depths" not in f)]
@@ -205,10 +210,11 @@ tiff_path = os.path.join(path,tiff_file)
 df = pd.DataFrame(pd.read_csv(icesat_path)) # load icesat data
 
 # Trim data by height
-df = trim_data_by_height(df, -5, 30)
-bin_width = 1 # meters
+df = trim_data_by_height(df, 20, 30)
+bin_width = 5 # meters
 
 segment_ice_height,df = get_surface_height(df)
+print("Segment ice height:",segment_ice_height)
 
 fig, (ax1,ax2) = plt.subplots(1,2) # Create figure
 
