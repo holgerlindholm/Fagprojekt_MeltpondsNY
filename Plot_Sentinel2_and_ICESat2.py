@@ -17,9 +17,9 @@ from tkinter import messagebox
 import re 
 import csv
 
-segment_folder_path = "C:/Users/chrel/Documents/Fagprojekt_Lokal/Fagprojekt-Meltponds-master/Tile_06_07_1629/"
+segment_folder_path = "c:\\Users\\35466\\Desktop\\DTU\\SEMESTER 4\\FAG-PROJECT\\meltpond_search"
 
-storage_folder = "C:/Users/chrel/Documents/GitHub/Fagprojekt_MeltpondsNY/Detected_meltponds/20210706162901_ChristianT"
+storage_folder = "c:\\Users\\35466\\Desktop\\DTU\\SEMESTER 4\\FAG-PROJECT\\meltpond_storage"
 
 #Error message pop up
 def error_message_window(message):
@@ -109,7 +109,7 @@ def average_drift(drift_vector, time_diff_sec):
 def find_meltpond_id():
     #Create lists containing names of all files in folders
     stored_files = os.listdir(storage_folder)
-    regex_pattern = re.compile(r"/d+_")
+    regex_pattern = re.compile(r"\d+_")
     filtered_filenames = [filename for filename in stored_files if regex_pattern.match(filename)]
 
     highest_digit_value = 0
@@ -171,11 +171,11 @@ def plot_images(Sentinel_name_1, Sentinel_name_2,ICE_track, ice_path):
     ax[0].scatter(Ice_x,Ice_y,color='red',s=1,alpha=0.5)
     ax[1].scatter(Ice_x,Ice_y,color='red',s=1,alpha=0.5)
     ax[2].scatter(ICE_track["x_atc"],ICE_track["h_ph"],color='black',s=1,alpha=0.5)
-    ax[2].set_ylim(24,34)
+    ax[2].set_ylim(-10,10)
 
-    tiff_1_name = Sentinel_name_1.split("/")
-    tiff_2_name = Sentinel_name_2.split("/")
-    csv_3_name = ice_path.split("/")
+    tiff_1_name = Sentinel_name_1.split("\\")
+    tiff_2_name = Sentinel_name_2.split("\\")
+    csv_3_name = ice_path.split("\\")
 
     time_1_tiff = extract_datetime(tiff_1_name[-1])
     print(f"Time 1: {time_1_tiff}")
@@ -232,7 +232,7 @@ def plot_images(Sentinel_name_1, Sentinel_name_2,ICE_track, ice_path):
         cropped_ice = icesat_crop.crop_df_by_latlon(ICE_track,[[tiff_lat_0,tiff_lat_1],[tiff_lon_0,tiff_lon_1]])
         ax[2].clear()
         ax[2].scatter(cropped_ice["x_atc"], cropped_ice["h_ph"],color='black',s=1,alpha=0.5)
-        ax[2].set_ylim(24,34)
+        ax[2].set_ylim(-10,10)
         if time_diff_ice <= 0 :
             ax[2].set_title(f'Time: -{timedelta(seconds=abs(time_diff_ice))}', fontsize=14, weight='bold', color='red')
         else:
@@ -329,7 +329,7 @@ def inspect_segment(segment_list):
     meltpond_id = find_meltpond_id()
 
     #save csv
-    drift_file_path = os.path.join(storage_folder+"/drift_values.csv")
+    drift_file_path = os.path.join(storage_folder+"\\drift_values.csv")
     save_drift_csv(drift_file_path, meltpond_id, drift_xy_sec)
 
     #give_icesat_name
@@ -348,7 +348,7 @@ def inspect_segment(segment_list):
 
 #Pick the number and beam
 
-selected_data = select_data("0","gt1ls")
+selected_data = select_data("1","gt3rw")   
 
 inspect_segment(selected_data)
 
