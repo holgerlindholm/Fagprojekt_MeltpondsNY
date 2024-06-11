@@ -17,9 +17,9 @@ from tkinter import messagebox
 import re 
 import csv
 
-segment_folder_path = "c:\\Users\\35466\\Desktop\\DTU\\SEMESTER 4\\FAG-PROJECT\\meltpond_search"
+segment_folder_path = "C:\\Users\\holge\\OneDrive - Danmarks Tekniske Universitet\\30110 Fagprojekt\\Getdata\\20210715214307_Holger"
 
-storage_folder = "c:\\Users\\35466\\Desktop\\DTU\\SEMESTER 4\\FAG-PROJECT\\meltpond_storage"
+storage_folder = "C:\\Users\\holge\\OneDrive - Danmarks Tekniske Universitet\\30110 Fagprojekt\\Getdata\\20210715214307_Holger\\Meltponds"
 
 #Error message pop up
 def error_message_window(message):
@@ -171,7 +171,7 @@ def plot_images(Sentinel_name_1, Sentinel_name_2,ICE_track, ice_path):
     ax[0].scatter(Ice_x,Ice_y,color='red',s=1,alpha=0.5)
     ax[1].scatter(Ice_x,Ice_y,color='red',s=1,alpha=0.5)
     ax[2].scatter(ICE_track["x_atc"],ICE_track["h_ph"],color='black',s=1,alpha=0.5)
-    ax[2].set_ylim(-10,10)
+    ax[2].set_ylim(-10,30)
 
     tiff_1_name = Sentinel_name_1.split("\\")
     tiff_2_name = Sentinel_name_2.split("\\")
@@ -232,7 +232,7 @@ def plot_images(Sentinel_name_1, Sentinel_name_2,ICE_track, ice_path):
         cropped_ice = icesat_crop.crop_df_by_latlon(ICE_track,[[tiff_lat_0,tiff_lat_1],[tiff_lon_0,tiff_lon_1]])
         ax[2].clear()
         ax[2].scatter(cropped_ice["x_atc"], cropped_ice["h_ph"],color='black',s=1,alpha=0.5)
-        ax[2].set_ylim(-10,10)
+        ax[2].set_ylim(-10,30)
         if time_diff_ice <= 0 :
             ax[2].set_title(f'Time: -{timedelta(seconds=abs(time_diff_ice))}', fontsize=14, weight='bold', color='red')
         else:
@@ -348,7 +348,7 @@ def inspect_segment(segment_list):
 
 #Pick the number and beam
 
-selected_data = select_data("1","gt3rw")   
+selected_data = select_data("20","gt2ls")   
 
 inspect_segment(selected_data)
 
