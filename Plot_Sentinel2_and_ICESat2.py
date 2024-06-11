@@ -348,7 +348,7 @@ def inspect_segment(segment_list):
 
 #Pick the number and beam
 
-selected_data = select_data("19","gt1ls")   
+selected_data = select_data("20","gt3rw")   
 
 inspect_segment(selected_data)
 
