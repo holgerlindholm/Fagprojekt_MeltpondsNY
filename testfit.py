@@ -157,12 +157,28 @@ ax1.hlines(-2*sd, min(df["x_atc"]), max(df["x_atc"]), color="black")
 ax1.scatter(depths[0],depths[4],c="orange",label="No refraction")
 ax1.legend()
 
-# Plot histogram
+# Plot histogram for whole segment
 ax3.hist(df["h_ph"],bins=30,alpha=0.4,color="blue")
 ax3.set(xlabel="Height",ylabel="Frequency")
 ax31 = ax3.twinx()
 ax31.plot(x,pdf,c="red",label="PDF")
 ax31.legend()
+
+# Plot histogram for single segment
+bin_width = 5
+max_height = -2*sd
+for i in np.arange(min(df["h_ph"]), max(df["h_ph"]), bin_width):
+    print(i)
+    if i == 5:
+        data = trim_data_by_xatc(df, i - 2 * bin_width, i + 3 * bin_width)
+        data = data[(data["h_ph"] < max_height)]
+        print(data)
+        surface_mode,x,pdf = calculate_mode(data["h_ph"])
+        ax4.hist(df["h_ph"],bins=30,alpha=0.4,color="blue")
+        ax4.plot(x,pdf,c="red")
+    else:
+        pass
+
 
 # Plot Sentinel image for reference
 img_1_RGB,transform_1,src = tiff_to_np_RGB(tiff_path)
