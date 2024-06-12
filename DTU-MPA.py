@@ -56,8 +56,10 @@ def tiff_to_np_RGB(Sentinel_name):
     - NB: Only reads RGB bands (3,2,1) to show image"""
     with rasterio.open(Sentinel_name) as src:
         # # Convert tiff to np array and transform coordinates
-        # print(src.read().shape)
+        print(f" Shape of img: {src.read().shape}")
+        # print(src.read(4))
         big_img = np.array([adjust_band(src.read(i)) for i in (3,2,1)])
+        #big_img = np.array(adjust_band(src.read(4))) # Check for NIR
         gain = 1 # Adjust the gain (brightness) of the image
         big_img = big_img * gain
     return big_img,src.transform,src.crs
@@ -259,6 +261,7 @@ def finish(path,out_path):
     print(filtered_drift)
     filtered_drift.to_csv(os.path.join(out_path,"drift.csv"),index=False)
     print("Drift values copied to drift.csv")
+    plt.close(fig)
 
 ############################################
 """MAIN PROGRAM STARTS HERE"""
@@ -272,10 +275,22 @@ def finish(path,out_path):
 # path = "20210624195859_Christian" 3
 # path = "20210628193330__XNR_Holger" 5
 
-# path = "20210706162901_ChristianT" 22 (LAV IGEN med 1sd)
+# path = "20210628193330_floki" 10 stk ((1,5,6) og (2,7) og (3,8,9,10) er ens)
+# path = "20210704232100_lower_Christian" 12 stk INGEN DRIFT?
 
-index =4 # CHANGE ME meltpond_id in folder!
+# path = "20210704232129_upper_Christian_ikkesikker4bånd" # Har ikke 4 bånd LAV IGEN
+# path = "20210706162901_ChristianT" 22 (LAV IGEN med 1sd) mega godt tile
+
+# path = "20210706221959_floki" 9 stk # et par stykket med saturation - ikke medtget
+# path = "20210706222524_Signe" 7 stk
+# path = "20210707141741_Christian" 9 stk # meget af drift virker fucked
+# path = "20210707215049_Christian" # 17 stk: id 3 og 12 kan bruges som model - mega godt tile
+# path = "20210710160901_Christian" # 21 stk En del gode i starten
+# path = "20210711153911_Christian" # 4 stk: et par gode
+
+index = 6 # CHANGE ME meltpond_id in folder!
 num_sd = 1 # Default = 1
+threshold = 2 # For removing outliers default = 2
 
 root_path = "C:/Users/holge/OneDrive/Documents/GitHub/Fagprojekt_MeltpondsNY/Detected_meltponds/"
 path = os.path.join(root_path,path)
@@ -319,7 +334,7 @@ x = x - surface_mode
 df_surface_approx.loc[:, "h_ph"] = df_surface_approx["h_ph"] - surface_mode
 
 df_depths = calculate_depths(df,bin_width=5,max_height=-sd*num_sd)
-df_cleaned, sd_depths = remove_outliers(df_depths,threshold=1,neighborhood=5)
+df_cleaned, sd_depths = remove_outliers(df_depths,threshold=threshold,neighborhood=5)
 new_index = np.linspace(0, len(df_cleaned) - 1, 2 * len(df_cleaned) - 1)
 df_interpolated = df_cleaned.reindex(new_index)
 df_interpolated = df_interpolated.interpolate(method="linear")
@@ -347,7 +362,7 @@ ax1.hlines(-2*sd, min(df["x_atc"]), max(df["x_atc"]), color="black")
 ax1.plot(df_cleaned["x_atc"],df_cleaned["depth"]+df_cleaned["sd"],c="orange")
 ax1.plot(df_cleaned["x_atc"],df_cleaned["depth"]-df_cleaned["sd"],c="orange")
 ax1.scatter(df_interpolated["x_atc"],df_interpolated["depth"],c="blue",label="Interpolate")
-ax1.scatter(df_depths["x_atc"],df_depths["depth"],c="orange",label="Refraction")
+ax1.scatter(df_cleaned["x_atc"],df_cleaned["depth"],c="orange",label="Refraction")
 
 # With refraction
 ax1.scatter(df_interpolated["x_atc"],df_interpolated["depth_no_refraction"],c="red",label="No refraction")
