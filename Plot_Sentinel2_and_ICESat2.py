@@ -17,9 +17,9 @@ from tkinter import messagebox
 import re 
 import csv
 
-segment_folder_path = "c:\\Users\\35466\\Desktop\\DTU\\SEMESTER 4\\FAG-PROJECT\\meltpond_search"
+segment_folder_path = "C:/Users/signe/OneDrive/Dokumenter/4. semester/Fagprojekt/tile_07_06_2021"
 
-storage_folder = "c:\\Users\\35466\\Desktop\\DTU\\SEMESTER 4\\FAG-PROJECT\\meltpond_storage"
+storage_folder = "C:/Users/signe/OneDrive/Dokumenter/4. semester/Fagprojekt/tile_07_06_2021/meltpond_storage"
 
 #Error message pop up
 def error_message_window(message):
@@ -348,7 +348,7 @@ def inspect_segment(segment_list):
 
 #Pick the number and beam
 
-selected_data = select_data("1","gt3rw")   
+selected_data = select_data("22","gt3rw")   
 
 inspect_segment(selected_data)
 

@@ -11,8 +11,8 @@ import Convert_bands_to_tiff
 - Place ICESat-2 h5 data and 2x sentinel-2 jp2 bands in a folder"""
 
 """DEFINE INPUT FOLDER AND MAIN SENTINEL FILE"""
-input_folder = "C:/Users/holge/OneDrive - Danmarks Tekniske Universitet/30110 Fagprojekt/Getdata/Datacropper/"
-Sentinel_path = "T20XNS_20210625T192909.tiff" # Main Sentinel file
+input_folder = "C:/Users/signe/OneDrive/Dokumenter/4. semester/Fagprojekt/tile_07_06_2021"
+Sentinel_path = "T13XDK_20210706T222059.tiff" # Main Sentinel file
 
 input_files = os.listdir(input_folder)
 sentinel_files = set([x[:-12] for x in input_files if x.endswith(".jp2")])

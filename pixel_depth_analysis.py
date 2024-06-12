@@ -92,7 +92,7 @@ for j in range(1,int((len(files)-1)/3+1)):
 # Read the drift values
 drift = pd.read_csv(os.path.join(path,"drift_values.csv"))
 
-index = 23 # CHANGE ME
+index = 0 # CHANGE ME
 drift_constant = 1.0 # change me!!
 
 
