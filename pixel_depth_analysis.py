@@ -74,40 +74,47 @@ def datetime_diff(datetime1, datetime2):
     return(datetime2.timestamp()-datetime1.timestamp())
 
 # Folder containing input data
+#path = "C:/Users/signe/OneDrive/Dokumenter/GitHub/Fagprojekt_MeltpondsNY/Detected_meltponds/20210707T215049_floki/depths"
+#path = "C:/Users/signe/OneDrive/Dokumenter/GitHub/Fagprojekt_MeltpondsNY/Detected_meltponds/20190622202251_Holger_Tilling/depths"
+#path = "C:/Users/signe/OneDrive/Dokumenter/GitHub/Fagprojekt_MeltpondsNY/Detected_meltponds/20190805215948_Holger_Tilling/depths"
+#path = "C:/Users/signe/OneDrive/Dokumenter/GitHub/Fagprojekt_MeltpondsNY/Detected_meltponds/20210624195859_Christian/depths"
+#path = "C:/Users/signe/OneDrive/Dokumenter/GitHub/Fagprojekt_MeltpondsNY/Detected_meltponds/20210628193330__XNR_Holger/depths"
+#path = "C:/Users/signe/OneDrive/Dokumenter/GitHub/Fagprojekt_MeltpondsNY/Detected_meltponds/20210628193330_floki/depths"
+#path = "C:/Users/signe/OneDrive/Dokumenter/GitHub/Fagprojekt_MeltpondsNY/Detected_meltponds/20210704232100_lower_Christian/depths"
 path = "C:/Users/signe/OneDrive/Dokumenter/GitHub/Fagprojekt_MeltpondsNY/Detected_meltponds/20210706162901_ChristianT/depths"
 
-# Extract the files in the folder and sort them: 
-# 1_ICESat2.csv, 1_depth.csv, 1_tiff.tiff, 2_ICESat2.csv, 2_depth.csv, 2_tiff.tiff, ...
-files = os.listdir(path)
-files_comb = []
-for j in range(1,int((len(files)-1)/3+1)):
-    print(j)
-    k = [1,3,4,5,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,25,26]
-    meltpond = []
-    for i in range(len(files)):
-        if files[i].startswith(f"{k[j-1]}_"):
-            meltpond.append(files[i])
-    files_comb.append(meltpond)
-
-# Read the drift values
-drift = pd.read_csv(os.path.join(path,"drift_values.csv"))
-
-index = 0 # CHANGE ME
+index = 23 # CHANGE ME!
 drift_constant = 1.0 # change me!!
 
 
-tiff_path = f"{path}/{files_comb[index][2]}"
+files = os.listdir(path)
+depth_files = [f for f in files if ("csv" in f) and ("depth" in f)]
+
+depth_file = depth_files[index]
+idx = depth_file.split("/")[-1].split("_")[0]
+
+tiff_file = [f for f in files if ("tiff" in f) and (f.split("_")[0]==idx)][0]
+# icesat_file = [f for f in files if ("csv" in f) and (f.split("_")[0]==idx) and ("depth" not in f)][0]
+files_comb = [depth_file,tiff_file]
+idx = int(idx)
+
+drift = pd.read_csv(os.path.join(path,"drift.csv"))
+print(idx)
+drift = drift[(drift["Meltpond_ID"]==idx)]
+print(drift)
+
+tiff_path = f"{path}/{files_comb[1]}"
 print(tiff_path)
-icesat_path = f"{path}/{files_comb[index][0]}"
-depth_path = f"{path}/{files_comb[index][1]}"
+depth_path = f"{path}/{files_comb[0]}"
 print(depth_path)
 
+
 # Extract the time difference between the two files
-tiff_time = extract_datetime(files_comb[index][2])
+tiff_time = extract_datetime(files_comb[1])
 print(tiff_time)
-icesat_time = extract_datetime(files_comb[index][0])
+icesat_time = extract_datetime(files_comb[0])
 print(icesat_time)
-timediff = datetime_diff(tiff_time,icesat_time) 
+timediff = datetime_diff(icesat_time,tiff_time) 
 print(timediff)
 
 # Open the tiff file and the icesat file
@@ -115,13 +122,11 @@ img_1_RGB,transform_1,src = tiff_to_np_RGB(tiff_path)
 img_1,transform_1,src,lons,lats = tiff_to_np(tiff_path)
 print(img_1.shape)
 
-icesat_df = pd.read_csv(icesat_path)
 depth_df = pd.read_csv(depth_path, sep=',')
 depth_x,depth_y = transform_coords_to_utm(depth_df,src)
-ice_x,ice_y = transform_coords_to_utm(icesat_df,src)
-drift_xNy = depth_x + drift["xs_drift"][index]*timediff*drift_constant
-drift_yNy = depth_y + drift["ys_drift"][index]*timediff*drift_constant
-
+ice_x,ice_y = transform_coords_to_utm(depth_df,src)
+drift_xNy = depth_x + drift.iloc[0]["xs_drift"]*timediff*drift_constant
+drift_yNy = depth_y + drift.iloc[0]["ys_drift"]*timediff*drift_constant
 
 def nearest_pixel(ice_x, ice_y, sentinel_x, sentinel_y):
     """find nearest pixel to meltpond from icesat depth"""
@@ -228,9 +233,6 @@ zone = [src.wkt[26:28],src.wkt[28]]
 x_pond_pixels, y_pond_pixels = nearest_pixel(drift_xNy, drift_yNy, lons, lats)
 pixel_info_matrix, x_pixels, y_pixels = pixel_depth_data(index, x_pond_pixels, y_pond_pixels, lons, lats, img_1, depth_df, zone)
 final_df = final_df_setup(pixel_info_matrix, tiff_time, icesat_time)
-
-drift_xNy = depth_x + drift["xs_drift"][index]*timediff*drift_constant
-drift_yNy = depth_y + drift["ys_drift"][index]*timediff*drift_constant
 
 fig,(ax1,ax2) = plt.subplots(1,2)
 img_2 = img_1_RGB
