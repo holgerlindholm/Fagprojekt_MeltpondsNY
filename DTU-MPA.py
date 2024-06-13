@@ -269,7 +269,7 @@ def finish(path,out_path):
 
 # Path to folder
 # path = "20210707T215049_floki" 25
-# path = "20190622202251_Holger_Tilling" 3
+path = "20190622202251_Holger_Tilling" # 3
 
 # path = "20190805215948_Holger_Tilling" 5
 # path = "20210624195859_Christian" 3
@@ -288,8 +288,8 @@ def finish(path,out_path):
 # path = "20210710160901_Christian" # 21 stk En del gode i starten
 # path = "20210711153911_Christian" # 4 stk: et par gode
 
-index = 6 # CHANGE ME meltpond_id in folder!
-num_sd = 1 # Default = 1
+index = 0 # CHANGE ME meltpond_id in folder!
+num_sd = 2 # Default = 1
 threshold = 2 # For removing outliers default = 2
 
 root_path = "C:/Users/holge/OneDrive/Documents/GitHub/Fagprojekt_MeltpondsNY/Detected_meltponds/"
