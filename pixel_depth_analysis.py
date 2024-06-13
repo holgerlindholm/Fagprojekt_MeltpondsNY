@@ -169,7 +169,7 @@ def pixel_depth_data(index, x_pond_pixels, y_pond_pixels, sentinel_x, sentinel_y
 def final_df_setup(pixel_information, sentinel_datetime, icesat_datetime):
     """ Joins the pixel information with general information about the melt pond"""
     
-    columns = ['Meltpond index','Latitude','Longtitude','b08 (NIR)','b02 (red)','b03 (green)','b04 (blue)','Depth [m]']
+    columns = ['Meltpond index','Latitude','Longtitude','b08 (NIR)','b04 (red)','b03 (green)','b02 (blue)','Depth [m]']
     pixel_df = pd.DataFrame(pixel_information, columns = columns)
     
     sentinel_time = []
