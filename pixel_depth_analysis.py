@@ -81,9 +81,15 @@ def datetime_diff(datetime1, datetime2):
 #path = "C:/Users/signe/OneDrive/Dokumenter/GitHub/Fagprojekt_MeltpondsNY/Detected_meltponds/20210628193330__XNR_Holger/depths"
 #path = "C:/Users/signe/OneDrive/Dokumenter/GitHub/Fagprojekt_MeltpondsNY/Detected_meltponds/20210628193330_floki/depths"
 #path = "C:/Users/signe/OneDrive/Dokumenter/GitHub/Fagprojekt_MeltpondsNY/Detected_meltponds/20210704232100_lower_Christian/depths"
-path = "C:/Users/signe/OneDrive/Dokumenter/GitHub/Fagprojekt_MeltpondsNY/Detected_meltponds/20210706162901_ChristianT/depths"
+#path = "C:/Users/signe/OneDrive/Dokumenter/GitHub/Fagprojekt_MeltpondsNY/Detected_meltponds/20210706162901_ChristianT/depths"
+#path = "C:/Users/signe/OneDrive/Dokumenter/GitHub/Fagprojekt_MeltpondsNY/Detected_meltponds/20210706221959_floki/depths"
+#path = "C:/Users/signe/OneDrive/Dokumenter/GitHub/Fagprojekt_MeltpondsNY/Detected_meltponds/20210706222524_Signe/depths"
+#path = "C:/Users/signe/OneDrive/Dokumenter/GitHub/Fagprojekt_MeltpondsNY/Detected_meltponds/20210707141741_Christian/depths"
+path = "C:/Users/signe/OneDrive/Dokumenter/GitHub/Fagprojekt_MeltpondsNY/Detected_meltponds/20210707215049_Christian/depths"
+#path = "C:/Users/signe/OneDrive/Dokumenter/GitHub/Fagprojekt_MeltpondsNY/Detected_meltponds/20210710160901_Christian/depths"
+#path = "C:/Users/signe/OneDrive/Dokumenter/GitHub/Fagprojekt_MeltpondsNY/Detected_meltponds/20210711153911_Christian/depths"
 
-index = 23 # CHANGE ME!
+index = 3 # CHANGE ME!
 drift_constant = 1.0 # change me!!
 
 
