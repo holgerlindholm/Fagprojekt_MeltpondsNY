@@ -89,8 +89,8 @@ path = "C:/Users/signe/OneDrive/Dokumenter/GitHub/Fagprojekt_MeltpondsNY/Detecte
 #path = "C:/Users/signe/OneDrive/Dokumenter/GitHub/Fagprojekt_MeltpondsNY/Detected_meltponds/20210710160901_Christian/depths"
 #path = "C:/Users/signe/OneDrive/Dokumenter/GitHub/Fagprojekt_MeltpondsNY/Detected_meltponds/20210711153911_Christian/depths"
 
-index = 2 # CHANGE ME!
-drift_constant = 0.85 # change me!!
+index = 0 # CHANGE ME!
+drift_constant = 1.0 # change me!!
 
 
 files = os.listdir(path)
@@ -221,7 +221,7 @@ def pixel_depth_data(index, x_pond_pixels, y_pond_pixels, sentinel_x, sentinel_y
 def final_df_setup(pixel_information, sentinel_datetime, icesat_datetime):
     """ Joins the pixel information with general information about the melt pond"""
     
-    columns = ['Meltpond index','Latitude','Longtitude','b08 (NIR)','b04 (red)','b03 (green)','b02 (blue)','Depth [m]','Depth sd [m]','NIR le','Red le','Green le','Blue le',
+    columns = ['Meltpond index','Latitude','Longtitude','b08 NIR','b04 red','b03 green','b02 blue','Depth m','Depth sd m','NIR le','Red le','Green le','Blue le',
                'NIR ri','Red ri','Green ri','Blue ri','NIR up','Red up','Green up','Blue up','NIR do','Red do','Green do','Blue do','NIR up le','Red up le','Green up le','Blue up le',
                'NIR up ri','Red up ri','Green up ri','Blue up ri','NIR do le','Red do le','Green do le','Blue do le','NIR do ri','Red do ri','Green do ri','Blue do ri']
     pixel_df = pd.DataFrame(pixel_information, columns = columns)
