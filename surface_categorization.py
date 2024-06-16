@@ -31,6 +31,7 @@ def tiff_to_RGB(Sentinel_name):
         big_img = big_img * gain
     return big_img
 
+
 def NDWI_calc(image):
     """Calculates normalized difference water index"""
     # the two necessary bands

@@ -284,12 +284,12 @@ path = "20190622202251_Holger_Tilling" # 3
 # path = "20210706221959_floki" 9 stk # et par stykket med saturation - ikke medtget
 # path = "20210706222524_Signe" 7 stk
 # path = "20210707141741_Christian" 9 stk # meget af drift virker fucked
-# path = "20210707215049_Christian" # 17 stk: id 3 og 12 kan bruges som model - mega godt tile
+path = "20210707215049_Christian" # 17 stk: id 3 og 12 kan bruges som model - mega godt tile
 # path = "20210710160901_Christian" # 21 stk En del gode i starten
 # path = "20210711153911_Christian" # 4 stk: et par gode
 
-index = 0 # CHANGE ME meltpond_id in folder!
-num_sd = 2 # Default = 1
+index = 3 # CHANGE ME meltpond_id in folder!
+num_sd = 1 # Default = 1
 threshold = 2 # For removing outliers default = 2
 
 root_path = "C:/Users/holge/OneDrive/Documents/GitHub/Fagprojekt_MeltpondsNY/Detected_meltponds/"
@@ -366,16 +366,17 @@ ax1.scatter(df_cleaned["x_atc"],df_cleaned["depth"],c="orange",label="Refraction
 
 # With refraction
 ax1.scatter(df_interpolated["x_atc"],df_interpolated["depth_no_refraction"],c="red",label="No refraction")
-
 ax1.set_title("Depth profile")
 ax1.set(xlabel="Along track distance",ylabel="Height")
 ax1.legend()
 
 # Plot histogram for whole segment
-ax3.hist(df["h_ph"],bins=30,alpha=0.4,color="blue")
+ax3.hist(df["h_ph"],bins=30,alpha=0.4,color="blue",orientation="horizontal")
 ax3.set(xlabel="Height",ylabel="Frequency")
-ax31 = ax3.twinx()
-ax31.plot(x,pdf,c="red",label="PDF")
+ax31 = ax3.twiny()
+_,x,pdf = calculate_mode(df["h_ph"],bw_method=0.2)
+ax31.plot(pdf,x,c="red",label="PDF")
+ax31.set(xlabel="PDF",ylabel="Height")
 ax31.legend()
 
 # Plot histogram for single segment

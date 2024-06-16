@@ -1,4 +1,4 @@
-,Meltpond_index,Latitude,Longtitude,b08_NIR,b04_red,b03_green,b02_blue,Depth[m],Time_sentinel,Time_ICESat,b08_NIR_left_neighbor,b04_red_left_neighbor,b03_green_left_neighbor,b02_blue_left_neighbor,b08_NIR_right_neighbor,b04_red_right_neighbor,b03_green_right_neighbor,b02_blue_right_neighbor
+idx,Meltpond_index,Latitude,Longtitude,b08_NIR,b04_red,b03_green,b02_blue,Depth[m],Time_sentinel,Time_ICESat,b08_NIR_left_neighbor,b04_red_left_neighbor,b03_green_left_neighbor,b02_blue_left_neighbor,b08_NIR_right_neighbor,b04_red_right_neighbor,b03_green_right_neighbor,b02_blue_right_neighbor
 0,0.0,82.28183337494985,-17.039524485432246,1315.0,2134.0,4184.0,5032.0,-0.6748521472251281,2021-07-06 16:29:01,2021-07-06 16:08:15,1436.0,2634.0,4784.0,5732.0,1219.0,2492.0,4860.0,5780.0
 1,0.0,82.2818395056342,-17.04018984306003,1219.0,2492.0,4860.0,5780.0,-0.9165896676355092,2021-07-06 16:29:01,2021-07-06 16:08:15,1315.0,2134.0,4184.0,5032.0,1192.0,2116.0,4200.0,4916.0
 2,0.0,82.28192887427569,-17.040144202375508,1192.0,2116.0,4200.0,4916.0,-0.8671340667588194,2021-07-06 16:29:01,2021-07-06 16:08:15,1219.0,2492.0,4860.0,5780.0,1311.0,1994.0,4032.0,4740.0
