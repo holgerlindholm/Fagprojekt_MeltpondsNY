@@ -75,7 +75,7 @@ def datetime_diff(datetime1, datetime2):
 
 # Folder containing input data
 #path = "C:/Users/signe/OneDrive/Dokumenter/GitHub/Fagprojekt_MeltpondsNY/Detected_meltponds/20210707T215049_floki/depths"
-path = "C:/Users/signe/OneDrive/Dokumenter/GitHub/Fagprojekt_MeltpondsNY/Detected_meltponds/20190622202251_Holger_Tilling/depths"
+#path = "C:/Users/signe/OneDrive/Dokumenter/GitHub/Fagprojekt_MeltpondsNY/Detected_meltponds/20190622202251_Holger_Tilling/depths"
 #path = "C:/Users/signe/OneDrive/Dokumenter/GitHub/Fagprojekt_MeltpondsNY/Detected_meltponds/20190805215948_Holger_Tilling/depths"
 #path = "C:/Users/signe/OneDrive/Dokumenter/GitHub/Fagprojekt_MeltpondsNY/Detected_meltponds/20210624195859_Christian/depths"
 #path = "C:/Users/signe/OneDrive/Dokumenter/GitHub/Fagprojekt_MeltpondsNY/Detected_meltponds/20210628193330__XNR_Holger/depths"
@@ -87,7 +87,7 @@ path = "C:/Users/signe/OneDrive/Dokumenter/GitHub/Fagprojekt_MeltpondsNY/Detecte
 #path = "C:/Users/signe/OneDrive/Dokumenter/GitHub/Fagprojekt_MeltpondsNY/Detected_meltponds/20210707141741_Christian/depths"
 #path = "C:/Users/signe/OneDrive/Dokumenter/GitHub/Fagprojekt_MeltpondsNY/Detected_meltponds/20210707215049_Christian/depths"
 #path = "C:/Users/signe/OneDrive/Dokumenter/GitHub/Fagprojekt_MeltpondsNY/Detected_meltponds/20210710160901_Christian/depths"
-#path = "C:/Users/signe/OneDrive/Dokumenter/GitHub/Fagprojekt_MeltpondsNY/Detected_meltponds/20210711153911_Christian/depths"
+path = "C:/Users/signe/OneDrive/Dokumenter/GitHub/Fagprojekt_MeltpondsNY/Detected_meltponds/20210711153911_Christian/depths"
 
 index = 0 # CHANGE ME!
 drift_constant = 1.0 # change me!!
@@ -126,6 +126,8 @@ print(timediff)
 # Open the tiff file and the icesat file
 img_1_RGB,transform_1,src = tiff_to_np_RGB(tiff_path)
 img_1,transform_1,src,lons,lats = tiff_to_np(tiff_path)
+#padding image
+img_pad = np.pad(img_1,[(0,0),(1,1),(1,1)])
 print(img_1.shape)
 
 depth_df = pd.read_csv(depth_path, sep=',')
@@ -155,7 +157,7 @@ def nearest_pixel(ice_x, ice_y, sentinel_x, sentinel_y):
 
 #print("UTM zone:", src.wkt)
 
-def pixel_depth_data(index, x_pond_pixels, y_pond_pixels, sentinel_x, sentinel_y, pond_img, icesat_data, zone):
+def pixel_depth_data(index, x_pond_pixels, y_pond_pixels, sentinel_x, sentinel_y, padded_pond_img, icesat_data, zone):
     """ Appending all data about pixels including corresponding depth measured by icesat to array"""
     
     pixel_information = np.zeros((len(x_pond_pixels),41))
@@ -168,52 +170,59 @@ def pixel_depth_data(index, x_pond_pixels, y_pond_pixels, sentinel_x, sentinel_y
     pixel_lat, pixel_lon = utm.to_latlon(x_pixels,y_pixels,int(zone[0]),zone[1])
    
     pixel_information[:,[1,2]] = np.transpose([pixel_lat, pixel_lon])
-   
-    for i in range(pond_img.shape[0]):
+    
+    x_pond_pixels = x_pond_pixels+1
+    y_pond_pixels = y_pond_pixels+1
+    
+    for i in range(4):
         print(i)
-        pixel_information[:,i+3] = pond_img[i,y_pond_pixels,x_pond_pixels]
+        pixel_information[:,i+3] = padded_pond_img[i,y_pond_pixels,x_pond_pixels]
     pixel_information[:,7] = depth_df['depth']
     pixel_information[:,8] = depth_df['sd']
     
     # left pixel
-    for i in range(pond_img.shape[0]):
+    for i in range(4):
         print(i)
-        pixel_information[:,i+9] = pond_img[i,y_pond_pixels,x_pond_pixels-1]
+        pixel_information[:,i+9] = padded_pond_img[i,y_pond_pixels,x_pond_pixels-1]
     
     # right pixel
-    for i in range(pond_img.shape[0]):
+    for i in range(4):
         print(i)
-        pixel_information[:,i+13] = pond_img[i,y_pond_pixels,x_pond_pixels+1]
+        pixel_information[:,i+13] = padded_pond_img[i,y_pond_pixels,x_pond_pixels+1]
     
     # upper pixel
-    for i in range(pond_img.shape[0]):
+    for i in range(4):
         print(i)
-        pixel_information[:,i+17] = pond_img[i,y_pond_pixels+1,x_pond_pixels]
+        pixel_information[:,i+17] = padded_pond_img[i,y_pond_pixels-1,x_pond_pixels]
     
     # below pixel
-    for i in range(pond_img.shape[0]):
-        print(i)
-        pixel_information[:,i+21] = pond_img[i,y_pond_pixels-1,x_pond_pixels]
+    # if any (y == len(lats)-1 for y in y_pond_pixels):
+    #     pixel_information[:,21:25] = np.zeros((len(y_pond_pixels),4))
+    # else:
+    for i in range(4):
+        pixel_information[:,i+21] = padded_pond_img[i,y_pond_pixels+1,x_pond_pixels]
     
     # upper left pixel
-    for i in range(pond_img.shape[0]):
-        print(i)
-        pixel_information[:,i+25] = pond_img[i,y_pond_pixels+1,x_pond_pixels-1]
+    for i in range(4):
+        pixel_information[:,i+25] = padded_pond_img[i,y_pond_pixels-1,x_pond_pixels-1]
     
     # upper right pixel
-    for i in range(pond_img.shape[0]):
-        print(i)
-        pixel_information[:,i+29] = pond_img[i,y_pond_pixels+1,x_pond_pixels+1]
+    for i in range(4):
+        pixel_information[:,i+29] = padded_pond_img[i,y_pond_pixels-1,x_pond_pixels+1]
     
     # below left pixel
-    for i in range(pond_img.shape[0]):
-        print(i)
-        pixel_information[:,i+33] = pond_img[i,y_pond_pixels-1,x_pond_pixels-1]
+    # if any (y == len(lats)-1 for y in y_pond_pixels) or (x == 0 for x in x_pond_pixels):
+    #     pixel_information[:,33:37] = np.zeros((len(y_pond_pixels),4))
+    # else:
+    for i in range(4):
+        pixel_information[:,i+33] = padded_pond_img[i,y_pond_pixels+1,x_pond_pixels-1]
     
     # below right pixel
-    for i in range(pond_img.shape[0]):
-        print(i)
-        pixel_information[:,i+37] = pond_img[i,y_pond_pixels-1,x_pond_pixels+1]
+    # if any (y == len(lats)-1 for y in y_pond_pixels) or (x == len(lons)-1 for x in x_pond_pixels):
+    #     pixel_information[:,37:41] = np.zeros((len(y_pond_pixels),4))
+    # else:
+    for i in range(4):
+        pixel_information[:,i+37] = padded_pond_img[i,y_pond_pixels+1,x_pond_pixels+1]
     
     return pixel_information, x_pixels, y_pixels
 
@@ -280,16 +289,16 @@ def get_positions(event):
 
 zone = [src.wkt[26:28],src.wkt[28]]
 x_pond_pixels, y_pond_pixels = nearest_pixel(drift_xNy, drift_yNy, lons, lats)
-pixel_info_matrix, x_pixels, y_pixels = pixel_depth_data(index, x_pond_pixels, y_pond_pixels, lons, lats, img_1, depth_df, zone)
+pixel_info_matrix, x_pixels, y_pixels = pixel_depth_data(index, x_pond_pixels, y_pond_pixels, lons, lats, img_pad, depth_df, zone)
 final_df = final_df_setup(pixel_info_matrix, tiff_time, icesat_time)
 
 fig,(ax1,ax2) = plt.subplots(1,2)
 img_2 = img_1_RGB
-#img_2[:,y_pond_pixels,x_pond_pixels] = 0
+#img_2[:,y_pond_pixels+1,x_pond_pixels] = 0
 show(img_2,transform=transform_1,ax=ax1)
 ax1.scatter(depth_x,depth_y)
 ax1.scatter(drift_xNy,drift_yNy,c=depth_df["depth"],cmap="viridis")
-ax1.scatter(max(lons),max(lats))
+#ax1.scatter(max(lons),max(lats))
 ax2.scatter(depth_df["x_atc"],depth_df["depth"])
 
 clicker = clicker(ax1, ["1", "2"], markers = ["*", "*"])
@@ -307,7 +316,9 @@ def append(event):
     y_click = [clicker_coordinates[0][1],clicker_coordinates[1][1]]
     click_lat, click_lon = utm.to_latlon(np.array(x_click),np.array(y_click),int(zone[0]),zone[1])
     
-    y_in = (min(click_lat) < pixel_info_matrix[:, 1]) & (pixel_info_matrix[:, 1] < max(click_lat))
+    depth_lat, depth_lon = utm.to_latlon(drift_xNy,drift_yNy,int(zone[0]),zone[1])
+    
+    y_in = (min(click_lat) < depth_lat) & (depth_lat < max(click_lat))
     y_in_coor = pixel_info_matrix[:,1][y_in]
     append_ready = final_df[final_df['Latitude'].isin(y_in_coor)]
     
