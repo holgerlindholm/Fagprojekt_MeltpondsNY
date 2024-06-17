@@ -74,7 +74,7 @@ def datetime_diff(datetime1, datetime2):
     return(datetime2.timestamp()-datetime1.timestamp())
 
 # Folder containing input data
-#path = "C:/Users/signe/OneDrive/Dokumenter/GitHub/Fagprojekt_MeltpondsNY/Detected_meltponds/20210707T215049_floki/depths"
+path = "C:/Users/signe/OneDrive/Dokumenter/GitHub/Fagprojekt_MeltpondsNY/Detected_meltponds/20210707T215049_floki/depths"
 #path = "C:/Users/signe/OneDrive/Dokumenter/GitHub/Fagprojekt_MeltpondsNY/Detected_meltponds/20190622202251_Holger_Tilling/depths"
 #path = "C:/Users/signe/OneDrive/Dokumenter/GitHub/Fagprojekt_MeltpondsNY/Detected_meltponds/20190805215948_Holger_Tilling/depths"
 #path = "C:/Users/signe/OneDrive/Dokumenter/GitHub/Fagprojekt_MeltpondsNY/Detected_meltponds/20210624195859_Christian/depths"
@@ -87,7 +87,7 @@ def datetime_diff(datetime1, datetime2):
 #path = "C:/Users/signe/OneDrive/Dokumenter/GitHub/Fagprojekt_MeltpondsNY/Detected_meltponds/20210707141741_Christian/depths"
 #path = "C:/Users/signe/OneDrive/Dokumenter/GitHub/Fagprojekt_MeltpondsNY/Detected_meltponds/20210707215049_Christian/depths"
 #path = "C:/Users/signe/OneDrive/Dokumenter/GitHub/Fagprojekt_MeltpondsNY/Detected_meltponds/20210710160901_Christian/depths"
-path = "C:/Users/signe/OneDrive/Dokumenter/GitHub/Fagprojekt_MeltpondsNY/Detected_meltponds/20210711153911_Christian/depths"
+#path = "C:/Users/signe/OneDrive/Dokumenter/GitHub/Fagprojekt_MeltpondsNY/Detected_meltponds/20210711153911_Christian/depths"
 
 index = 0 # CHANGE ME!
 drift_constant = 1.0 # change me!!
