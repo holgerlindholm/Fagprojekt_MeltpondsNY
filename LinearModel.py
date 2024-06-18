@@ -124,109 +124,118 @@ def sum_surrounding_pixels(image):
             summed_image[y, x] = sum_neighbors/8
     return summed_image
 
-file = "Detected_meltponds/20210710160901_Christian/17_T27XWM_20210710T160901_gt3rw.tiff"
-path = "C:/Users/holge/OneDrive/Documents/GitHub/Fagprojekt_MeltpondsNY"
-mp_path = os.path.join(path,file)
 
-data = "Pixel_med_2naboer.csv"
-df = pd.read_csv(os.path.join(path,data))
-df = df[(df["Meltpond_index"]==128)]
+def main():
+    file = "Detected_meltponds/20210710160901_Christian/17_T27XWM_20210710T160901_gt3rw.tiff"
+    path = "C:/Users/holge/OneDrive/Documents/GitHub/Fagprojekt_MeltpondsNY"
+    mp_path = os.path.join(path,file)
 
-fig,(ax1,ax2,ax3) = plt.subplots(1,3,figsize=(10,5))
-img,transform,crs = tiff_to_np_RGB(mp_path)
-show(img,transform=transform,ax=ax1)
-x,y = transform_coords_to_utm(df,crs)
-ax1.scatter(x,y,c=df["Depth[m]"],cmap="viridis",label="True depth")
+    data = "Pixel_med_2naboer.csv"
+    df = pd.read_csv(os.path.join(path,data))
+    df = df[(df["Meltpond_index"]==128)]
 
-# Get the depth of the meltponds
-image,_,_ = tiff_to_np(mp_path)
-nabo = sum_surrounding_pixels(image)
+    fig,(ax1,ax2,ax3) = plt.subplots(1,3,figsize=(10,5))
+    img,transform,crs = tiff_to_np_RGB(mp_path)
+    show(img,transform=transform,ax=ax1)
+    x,y = transform_coords_to_utm(df,crs)
+    ax1.scatter(x,y,c=df["Depth[m]"],cmap="viridis",label="True depth")
 
-
-b04 = image[1]
-b03 = image[2]
-b02 = image[3]
-b08 = image[0]
-
-depth = get_depth(b02,b03,b04,b08)
-depth = np.array(depth)
-water, water_mask = water_identifier(image,b08)
-depth_image = np.zeros(depth.shape)
-depth_image[~water_mask] = depth[~water_mask]
-depth_image[water_mask] = 0
-
-depth_general,errors = get_depth_general(b02,b03,b04,b08)
-depth_general = np.array(depth_general)
-depth_image_general = np.zeros(depth.shape)
-depth_image_general[~water_mask] = depth_general[~water_mask]
-depth_image_general[water_mask] = 0
-
-depth_neighbour = depth_nabo(b02,b03,b04,b08,nabo[3],nabo[2],nabo[1],nabo[0])
-depth_neighbour = np.array(depth_neighbour)
-depth_image_neighbour = np.zeros(depth.shape)
-depth_image_neighbour[~water_mask] = depth_neighbour[~water_mask]
-depth_image_neighbour[water_mask] = 0
-
-vmax = 0
-vmin = min(depth_image.min(),depth_general.min())
-
-volumne_specific = np.sum((abs(depth_image[~water_mask]))*10*10)
-print(f"Volume of water: {volumne_specific}")
-volumne_general = np.sum(abs(depth_image_general[~water_mask]))*10*10
-vol_general_error = (np.sum(errors[~water_mask])*10*10)
-vol_general_error1 = np.sqrt(np.sum(((errors[~water_mask])*10*10)**2))
-print(f"Volume of water: {volumne_general,vol_general_error1}")
-
-# cax2 = ax2.imshow(depth_image,vmin=vmin, vmax=vmax,cmap="viridis")
-# ax2.title.set_text("Depth of meltponds specfic model")
-# ax2.text(0.5, -0.10, f"Vol of water: {round(volumne_specific,1)} m3", ha='center', va='center', transform=ax2.transAxes)
-# ax2.text(0.5, -0.15, f"R2: 0.78, STD: 0.11", ha='center', va='center', transform=ax2.transAxes)
-
-volumne_N8 = np.sum(abs(depth_image_neighbour[~water_mask]))*10*10
-print(f"Volume of water: {volumne_N8}")
-
-cax2 = ax2.imshow(depth_image_neighbour,vmin=vmin,vmax=vmax,cmap="viridis")
-ax2.title.set_text("Depth of meltponds N=8 model")
-ax2.text(0.5, -0.10, f"Vol of water: {round(volumne_N8,1)} m3", ha='center', va='center', transform=ax2.transAxes)
-ax2.text(0.5, -0.15, f"R2: 0.55, STD: 0.15", ha='center', va='center', transform=ax2.transAxes)
+    # Get the depth of the meltponds
+    image,_,_ = tiff_to_np(mp_path)
+    nabo = sum_surrounding_pixels(image)
 
 
-cax3 = ax3.imshow(depth_image_general,vmin=vmin,vmax=vmax,cmap="viridis")
-ax3.title.set_text("Depth of meltponds N=0")
-ax3.text(0.5, -0.10, f"Vol of water: {round(volumne_general,1)} m3", ha='center', va='center', transform=ax3.transAxes)
-ax2.text(0.5, -0.15, f"R2: 0.51, STD: 0.15", ha='center', va='center', transform=ax3.transAxes)
+    b04 = image[1]
+    b03 = image[2]
+    b02 = image[3]
+    b08 = image[0]
+
+    depth = get_depth(b02,b03,b04,b08)
+    depth = np.array(depth)
+    water, water_mask = water_identifier(image,b08)
+    depth_image = np.zeros(depth.shape)
+    depth_image[~water_mask] = depth[~water_mask]
+    depth_image[water_mask] = 0
+
+    depth_general,errors = get_depth_general(b02,b03,b04,b08)
+    depth_general = np.array(depth_general)
+    depth_image_general = np.zeros(depth.shape)
+    depth_image_general[~water_mask] = depth_general[~water_mask]
+    depth_image_general[water_mask] = 0
+
+    depth_neighbour = depth_nabo(b02,b03,b04,b08,nabo[3],nabo[2],nabo[1],nabo[0])
+    depth_neighbour = np.array(depth_neighbour)
+    depth_image_neighbour = np.zeros(depth.shape)
+    depth_image_neighbour[~water_mask] = depth_neighbour[~water_mask]
+    depth_image_neighbour[water_mask] = 0
+
+    vmax = 0
+    vmin = min(depth_image.min(),depth_general.min())
+
+    volumne_specific = np.sum((abs(depth_image[~water_mask]))*10*10)
+    print(f"Volume of water: {volumne_specific}")
+    volumne_general = np.sum(abs(depth_image_general[~water_mask]))*10*10
+    vol_general_error = (np.sum(errors[~water_mask])*10*10)
+    vol_general_error1 = np.sqrt(np.sum(((errors[~water_mask])*10*10)**2))
+    print(f"Volume of water: {volumne_general,vol_general_error1}")
+
+    # cax2 = ax2.imshow(depth_image,vmin=vmin, vmax=vmax,cmap="viridis")
+    # ax2.title.set_text("Depth of meltponds specfic model")
+    # ax2.text(0.5, -0.10, f"Vol of water: {round(volumne_specific,1)} m3", ha='center', va='center', transform=ax2.transAxes)
+    # ax2.text(0.5, -0.15, f"R2: 0.78, STD: 0.11", ha='center', va='center', transform=ax2.transAxes)
+
+    volumne_N8 = np.sum(abs(depth_image_neighbour[~water_mask]))*10*10
+    print(f"Volume of water: {volumne_N8}")
+
+    cax2 = ax2.imshow(depth_image_neighbour,vmin=vmin,vmax=vmax,cmap="viridis")
+    ax2.title.set_text("Depth of meltponds N=8 model")
+    ax2.text(0.5, -0.10, f"Vol of water: {round(volumne_N8,1)} m3", ha='center', va='center', transform=ax2.transAxes)
+    ax2.text(0.5, -0.15, f"R2: 0.55, STD: 0.15", ha='center', va='center', transform=ax2.transAxes)
+
+
+    cax3 = ax3.imshow(depth_image_general,vmin=vmin,vmax=vmax,cmap="viridis")
+    ax3.title.set_text("Depth of meltponds N=0")
+    ax3.text(0.5, -0.10, f"Vol of water: {round(volumne_general,1)} m3", ha='center', va='center', transform=ax3.transAxes)
+    ax2.text(0.5, -0.15, f"R2: 0.51, STD: 0.15", ha='center', va='center', transform=ax3.transAxes)
 
 
 
-# Add a colorbar that applies to both subplots
-cbar = fig.colorbar(cax3, ax=[ax2, ax3], orientation='vertical')
-cbar.set_label('Depth (m)')
+    # Add a colorbar that applies to both subplots
+    cbar = fig.colorbar(cax3, ax=[ax2, ax3], orientation='vertical')
+    cbar.set_label('Depth (m)')
 
-plt.show()
+    plt.show()
 
-#################
+    #################
 
-Pre_depth = get_depth(df["b02_blue"].values,df["b03_green"].values,df["b04_red"].values,df["b08_NIR"].values)
-Pre_depth_general = get_depth_general(df["b02_blue"].values,df["b03_green"].values,df["b04_red"].values,df["b08_NIR"].values)
-fig,(ax1,ax2) = plt.subplots(1,2,figsize=(5,5))
-ax1.set_title("True vs predicted depth")
-ax1.plot(df["idx"],df["Depth[m]"],label="True depth")
-ax1.plot(df["idx"],Pre_depth,label="Predicted depth")
-ax1.plot(df["idx"],Pre_depth_general,label="Predicted depth general")
-ax1.legend()
+    Pre_depth = get_depth(df["b02_blue"].values,df["b03_green"].values,df["b04_red"].values,df["b08_NIR"].values)
+    Pre_depth_general = get_depth_general(df["b02_blue"].values,df["b03_green"].values,df["b04_red"].values,df["b08_NIR"].values)
+    fig,(ax1,ax2) = plt.subplots(1,2,figsize=(5,5))
+    ax1.set_title("True vs predicted depth")
+    ax1.plot(df["idx"],df["Depth[m]"],label="True depth")
+    ax1.plot(df["idx"],Pre_depth,label="Predicted depth")
+    ax1.plot(df["idx"],Pre_depth_general,label="Predicted depth general")
+    ax1.legend()
 
-X = df["Depth[m]"].to_numpy()
-Y = Pre_depth
-reg = LinearRegression()
-reg.fit(X.reshape(-1,1),Y.reshape(-1,1))
-depth_pred_linear = reg.predict(X.reshape(-1,1))
-print(f"R2 score: {reg.score(X.reshape(-1,1),Y.reshape(-1,1))}")
+    X = df["Depth[m]"].to_numpy()
+    Y = Pre_depth
+    reg = LinearRegression()
+    reg.fit(X.reshape(-1,1),Y.reshape(-1,1))
+    depth_pred_linear = reg.predict(X.reshape(-1,1))
+    print(f"R2 score: {reg.score(X.reshape(-1,1),Y.reshape(-1,1))}")
 
-ax2.scatter(df["Depth[m]"],Pre_depth)
-ax2.plot(X,depth_pred_linear)
-plt.plot(X,X)
-ax2.set_xlabel("True depth")    
-ax2.set_ylabel("Predicted depth")
-plt.title("True vs predicted depth")
+    ax2.scatter(df["Depth[m]"],Pre_depth)
+    ax2.plot(X,depth_pred_linear)
+    plt.plot(X,X)
+    ax2.set_xlabel("True depth")    
+    ax2.set_ylabel("Predicted depth")
+    plt.title("True vs predicted depth")
 
-plt.show()
+    plt.show()
+
+if __name__ == "__main__":
+    main()
+
+
+
+
