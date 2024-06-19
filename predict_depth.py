@@ -6,7 +6,7 @@ import os
 
 current_dir = os.getcwd()
 
-def predict_depth(data, num_p):
+def predict_depth(df, num_p):
 
     # Choose correct model depending on number of neighbors
     if num_p == 9:
